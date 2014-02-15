@@ -5,22 +5,23 @@ import org.firstrobotics1923.event.CompressorOffEvent;
 import org.firstrobotics1923.event.CompressorOnEvent;
 import org.firstrobotics1923.event.IntakeAngleInEvent;
 import org.firstrobotics1923.event.IntakeAngleOutEvent;
+import org.firstrobotics1923.event.IntakeMotorForwardEvent;
 import org.firstrobotics1923.event.IntakeMotorOffEvent;
-import org.firstrobotics1923.event.IntakeMotorOnEvent;
+import org.firstrobotics1923.event.IntakeMotorReverseEvent;
 import org.firstrobotics1923.event.ShooterLowerAngleEvent;
 import org.firstrobotics1923.event.ShooterRaiseAngleEvent;
-import org.firstrobotics1923.event.ShooterSpeedDownEvent;
-import org.firstrobotics1923.event.ShooterSpeedUpEvent;
 import org.firstrobotics1923.event.ShooterStartEvent;
 import org.firstrobotics1923.event.ShooterStopEvent;
+import org.firstrobotics1923.routines.AutonomousRoutine;
+import org.firstrobotics1923.routines.MethylRoutine;
 import org.firstrobotics1923.util.XboxController;
 
 /**
  * The Core Code for FRC Team 1923's "Aerial Assist" Robot 
  * 
- * @author Pavan Hegde
+ * @author Pavan Hegde & whoever did the dashboard stuff that is commented out
  * @version 1.0
- * @since Jan. 26, 2014
+ * @since Feb. 15, 2014
  */
 public class AssistRobot extends IterativeRobot{
     
@@ -29,11 +30,13 @@ public class AssistRobot extends IterativeRobot{
     private boolean[] justPressed = new boolean[14];       //Array to store Xbox button input
     private boolean[] triggers = new boolean[2]; //Array to store Xbox trigger input
         
+    private AutonomousRoutine auton;
+    
     private boolean compressorOn = false;
     
     public void robotInit(){
-        //Components.rightDriveEncoder.setDistancePerPulse(256); //TODO: update
-        //Components.leftDriveEncoder.setDistancePerPulse(256); //TODO: update
+        Components.rightDriveEncoder.setDistancePerPulse(1); //TODO: update
+        Components.leftDriveEncoder.setDistancePerPulse(1); //TODO: update
     }
     
     /**
@@ -41,10 +44,10 @@ public class AssistRobot extends IterativeRobot{
      */
     public void disabledInit() {
         Components.shooterSystem.stop();
-        //Components.shooterAngleSystem.stop();
-        //Components.robotDrive.stop();
-        //Components.intakeSystem.stop();
-       // EventBus.instance.clear();
+        Components.shooterAngleSystem.stop();
+        Components.robotDrive.stop();
+        Components.intakeSystem.stop();
+        EventBus.instance.clear();
     }
     
     public void disabledPeriodic() {
@@ -55,7 +58,7 @@ public class AssistRobot extends IterativeRobot{
      * Called once at the start of Auton
      */
     public void autonomousInit() {
-        
+        //auton = new MethylRoutine();
     }
     
     /**
@@ -63,20 +66,22 @@ public class AssistRobot extends IterativeRobot{
      */
     public void autonomousPeriodic(){
         
+        //EventBus.instance.clean();
+        //EventBus.instance.next();
     }
     
     /**
      * Initializes required things before teleop
      */
     public void teleopInit() {
-       //Not'in' yet
+        EventBus.instance.clear();
+        //Not'in' else
     }
     
     /**
      * All of the periodically called teleop-functions (eg. input)
      */
     public void teleopPeriodic() {
-        
         { //Driving Scope
            Components.robotDrive.drive(Components.leftStick.getCoalescedY(), Components.rightStick.getCoalescedY());
            System.out.println("Left: " + Components.leftStick.getCoalescedY() + " Right: " + Components.rightStick.getCoalescedY());
@@ -95,20 +100,6 @@ public class AssistRobot extends IterativeRobot{
                justPressed[XboxController.Button.Back.value] = false;
            } else {
                justPressed[XboxController.Button.Back.value] = false;
-           }
-           
-           if (Components.operatorControl.getButton(XboxController.Button.LB) & !justPressed[XboxController.Button.LB.value]) {         //Left Bumper Slows down the shooter
-               EventBus.instance.push(new ShooterSpeedDownEvent());
-               justPressed[XboxController.Button.LB.value] = true;
-           } else {
-               justPressed[XboxController.Button.LB.value] = false;
-           }
-           
-           if (Components.operatorControl.getButton(XboxController.Button.RB) & !justPressed[XboxController.Button.RB.value]) {         //Right Bumper speeds up the shooter
-               EventBus.instance.push(new ShooterSpeedUpEvent());
-               justPressed[XboxController.Button.RB.value] = true;
-           } else {
-               justPressed[XboxController.Button.RB.value] = false;
            }
         } //End Shooter Scope
         
@@ -143,18 +134,25 @@ public class AssistRobot extends IterativeRobot{
                justPressed[XboxController.Button.X.value] = false;
            }
            
-           if (Components.operatorControl.getButton(XboxController.Button.A) & !justPressed[XboxController.Button.A.value]) {         //A turns on the intake motor
-               EventBus.instance.push(new IntakeMotorOnEvent());
-               justPressed[XboxController.Button.A.value] = true;
-           } else {
-               justPressed[XboxController.Button.A.value] = false;
-           }
-           
            if (Components.operatorControl.getButton(XboxController.Button.Y) & !justPressed[XboxController.Button.Y.value]) {         //Y turns off the intake motor
                EventBus.instance.push(new IntakeMotorOffEvent());
                justPressed[XboxController.Button.Y.value] = true;
            } else {
                justPressed[XboxController.Button.Y.value] = false;
+           }
+           
+           if (Components.operatorControl.getButton(XboxController.Button.LB) & !justPressed[XboxController.Button.LB.value]) {         //Left Bumper starts the intake in reverse
+               EventBus.instance.push(new IntakeMotorReverseEvent());
+               justPressed[XboxController.Button.LB.value] = true;
+           } else {
+               justPressed[XboxController.Button.LB.value] = false;
+           }
+           
+           if (Components.operatorControl.getButton(XboxController.Button.RB) & !justPressed[XboxController.Button.RB.value]) {         //Right Bumper starts the intake forward
+               EventBus.instance.push(new IntakeMotorForwardEvent());
+               justPressed[XboxController.Button.RB.value] = true;
+           } else {
+               justPressed[XboxController.Button.RB.value] = false;
            }
         } //End Intake Scope
         
@@ -172,5 +170,84 @@ public class AssistRobot extends IterativeRobot{
             EventBus.instance.next();
             EventBus.instance.clean();
         } //End EvntBus Scope
+        
+        //updateDashboard();
     }
+    
+    /*public void updateDashboard() {
+        Dashboard lowDashData = DriverStation.getInstance().getDashboardPackerLow();
+        lowDashData.addCluster();
+        {
+            lowDashData.addCluster();
+            {     //analog modules
+                lowDashData.addCluster();
+                {
+                    for (int i = 1; i <= 8; i++) {
+                        lowDashData.addFloat((float) AnalogModule.getInstance(1).getAverageVoltage(i));
+                    }
+                }
+                lowDashData.finalizeCluster();
+                lowDashData.addCluster();
+                {
+                    for (int i = 1; i <= 8; i++) {
+                        lowDashData.addFloat((float) AnalogModule.getInstance(2).getAverageVoltage(i));
+                    }
+                }
+                lowDashData.finalizeCluster();
+            }
+            lowDashData.finalizeCluster();
+
+            lowDashData.addCluster();
+            { //digital modules
+                lowDashData.addCluster();
+                {
+                    lowDashData.addCluster();
+                    {
+                        int module = 1;
+                        lowDashData.addByte(DigitalModule.getInstance(module).getRelayForward());
+                        lowDashData.addByte(DigitalModule.getInstance(module).getRelayForward());
+                        lowDashData.addShort(DigitalModule.getInstance(module).getAllDIO());
+                        lowDashData.addShort(DigitalModule.getInstance(module).getDIODirection());
+                        lowDashData.addCluster();
+                        {
+                            for (int i = 1; i <= 10; i++) {
+                                lowDashData.addByte((byte) DigitalModule.getInstance(module).getPWM(i));
+                            }
+                        }
+                        lowDashData.finalizeCluster();
+                    }
+                    lowDashData.finalizeCluster();
+                }
+                lowDashData.finalizeCluster();
+
+                lowDashData.addCluster();
+                {
+                    lowDashData.addCluster();
+                    {
+                        int module = 2;
+                        lowDashData.addByte(DigitalModule.getInstance(module).getRelayForward());
+                        lowDashData.addByte(DigitalModule.getInstance(module).getRelayReverse());
+                        lowDashData.addShort(DigitalModule.getInstance(module).getAllDIO());
+                        lowDashData.addShort(DigitalModule.getInstance(module).getDIODirection());
+                        lowDashData.addCluster();
+                        {
+                            for (int i = 1; i <= 10; i++) {
+                                lowDashData.addByte((byte) DigitalModule.getInstance(module).getPWM(i));
+                            }
+                        }
+                        lowDashData.finalizeCluster();
+                    }
+                    lowDashData.finalizeCluster();
+                }
+                lowDashData.finalizeCluster();
+
+            }
+            lowDashData.finalizeCluster();
+
+            lowDashData.addByte(Solenoid.getAllFromDefaultModule());
+        }
+        lowDashData.finalizeCluster(); 
+        lowDashData.commit();
+    }*/
 }
+
