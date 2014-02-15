@@ -1,6 +1,8 @@
 package org.firstrobotics1923;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import org.firstrobotics1923.event.CompressorOffEvent;
+import org.firstrobotics1923.event.CompressorOnEvent;
 import org.firstrobotics1923.event.IntakeAngleInEvent;
 import org.firstrobotics1923.event.IntakeAngleOutEvent;
 import org.firstrobotics1923.event.IntakeMotorOffEvent;
@@ -27,6 +29,8 @@ public class AssistRobot extends IterativeRobot{
     private boolean[] justPressed = new boolean[14];       //Array to store Xbox button input
     private boolean[] triggers = new boolean[2]; //Array to store Xbox trigger input
         
+    private boolean compressorOn = false;
+    
     public void robotInit(){
         //Components.rightDriveEncoder.setDistancePerPulse(256); //TODO: update
         //Components.leftDriveEncoder.setDistancePerPulse(256); //TODO: update
@@ -155,14 +159,18 @@ public class AssistRobot extends IterativeRobot{
         } //End Intake Scope
         
         { //Compressor Scope
-            if (false) {
-                //TODO Compressor on if presssure is low
+            if (!Components.compressorSafety.get() && !compressorOn) {
+                EventBus.instance.push(new CompressorOnEvent());
+                compressorOn = true;
+            }else {
+                EventBus.instance.push(new CompressorOffEvent());
+                compressorOn = false;
             }
         } //End Compressor Scope
   
         { //Event Bus Scope
-            //EventBus.instance.next();
-            //EventBus.instance.clean();
+            EventBus.instance.next();
+            EventBus.instance.clean();
         } //End EvntBus Scope
     }
 }

@@ -23,8 +23,7 @@ public class IntakeMotorOffEvent extends Event{
      * Turns off the intake wheels
      */
     public void event() {
-        //Components.intakeSystem.deactivateMotor();
-        Components.intakeMotor.set(Relay.Value.kOff);
+        Components.intakeSystem.deactivateMotor();
     }
     
 }
