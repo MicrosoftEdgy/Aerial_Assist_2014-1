@@ -23,7 +23,6 @@ public class IntakeMotorOnEvent extends Event{
      * Turns on the motor on the intake system
      */
     public void event() {
-       // Components.intakeSystem.activateMotor();
-        Components.intakeMotor.set(Relay.Value.kOn);
+        Components.intakeSystem.activateMotor();
     }
 }

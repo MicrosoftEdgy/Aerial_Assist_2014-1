@@ -24,14 +24,14 @@ public class DriveSystem extends RobotDrive{
     
     public void drive(double leftMag, double rightMag) {
         this.tankDrive(leftMag, rightMag);
-        //Components.rightDriveEncoder.start();
+        Components.rightDriveEncoder.start();
     }
     
     public void setSafety(boolean enabled) {
         this.setSafetyEnabled(enabled);
     }
     
-    /*public boolean getRightEncoderDirection() {
+    public boolean getRightEncoderDirection() {
         return Components.rightDriveEncoder.getDirection();
     }
     
@@ -58,12 +58,12 @@ public class DriveSystem extends RobotDrive{
     public void resetEncoders() {
         Components.rightDriveEncoder.reset();
         Components.leftDriveEncoder.reset();
-    }*/
+    }
     
     public void stop() {
         super.stopMotor();
-        //Components.rightDriveEncoder.stop();
-        //Components.leftDriveEncoder.stop();
+        Components.rightDriveEncoder.stop();
+        Components.leftDriveEncoder.stop();
     }   
 }
 
