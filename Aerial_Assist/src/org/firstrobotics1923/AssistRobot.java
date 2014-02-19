@@ -1,6 +1,8 @@
 package org.firstrobotics1923;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import org.firstrobotics1923.event.CompressorOffEvent;
 import org.firstrobotics1923.event.CompressorOnEvent;
 import org.firstrobotics1923.event.IntakeAngleInEvent;
@@ -14,8 +16,8 @@ import org.firstrobotics1923.event.ShooterStartEvent;
 import org.firstrobotics1923.event.ShooterStopEvent;
 import org.firstrobotics1923.routines.AutonomousRoutine;
 import org.firstrobotics1923.routines.MethylRoutine;
+import org.firstrobotics1923.routines.MethylRoutine2;
 import org.firstrobotics1923.util.XboxController;
-
 /**
  * The Core Code for FRC Team 1923's "Aerial Assist" Robot 
  * 
@@ -24,19 +26,24 @@ import org.firstrobotics1923.util.XboxController;
  * @since Feb. 15, 2014
  */
 public class AssistRobot extends IterativeRobot{
-    
     private XboxController xbc = Components.operatorControl;
     
     private boolean[] justPressed = new boolean[14];       //Array to store Xbox button input
     private boolean[] triggers = new boolean[2]; //Array to store Xbox trigger input
         
     private AutonomousRoutine auton;
-    
+
     private boolean compressorOn = false;
     
+    private NetworkTable table;
+    
     public void robotInit(){
-        Components.rightDriveEncoder.setDistancePerPulse(1); //TODO: update
-        Components.leftDriveEncoder.setDistancePerPulse(1); //TODO: update
+        this.table = Components.table;
+  //      Components.rightDriveEncoder.setDistancePerPulse(1); //TODO: update
+//        Components.leftDriveEncoder.setDistancePerPulse(1); //TODO: update
+        this.compressorOn = false;
+        Components.shooterAngleSystem.stop();
+        Components.intakeSystem.stop();
     }
     
     /**
@@ -58,24 +65,26 @@ public class AssistRobot extends IterativeRobot{
      * Called once at the start of Auton
      */
     public void autonomousInit() {
+        MethylRoutine2.start();
         //auton = new MethylRoutine();
+        //auton.run();
     }
     
     /**
      * Called periodically in auton
      */
     public void autonomousPeriodic(){
-        
-        //EventBus.instance.clean();
-        //EventBus.instance.next();
+        MethylRoutine2.doEvent();
+       // EventBus.instance.clean();
+       // EventBus.instance.next();
     }
     
     /**
      * Initializes required things before teleop
      */
     public void teleopInit() {
-        EventBus.instance.clear();
-        //Not'in' else
+        MethylRoutine2.stop();
+        EventBus.instance.clear();        
     }
     
     /**
@@ -83,9 +92,33 @@ public class AssistRobot extends IterativeRobot{
      */
     public void teleopPeriodic() {
         { //Driving Scope
-           Components.robotDrive.drive(Components.leftStick.getCoalescedY(), Components.rightStick.getCoalescedY());
-           System.out.println("Left: " + Components.leftStick.getCoalescedY() + " Right: " + Components.rightStick.getCoalescedY());
+                    System.out.println("Hot Target " + table.getString("Hot_Target"));
+                    System.out.println("Distance: " + table.getNumber("TARGET_DISTANCE"));
+
+            double idealLeft = Components.leftStick.getCoalescedY();
+            double idealRight = Components.rightStick.getCoalescedY();
+
+ //           System.out.println("Encoder Rate L, R: " + Components.leftDriveEncoder.getRate() + ", " + Components.rightDriveEncoder.getRate());
+ //           double realLeft = Components.leftDriveEncoder.getRate() / 1024; //TODO Update Values to Rate at 1.0
+ //           double realRight = Components.rightDriveEncoder.getRate() / 1024; //TODO Update Values to Rate at 1.0
+            
+  //          double errorLeft = realLeft - idealLeft;
+  //          double errorRight = realRight - idealRight;
+
+            double newLeft = idealLeft;// - errorLeft;
+            double newRight = idealRight;// - errorRight;
+
+            double maxNewLeftRight = Math.max(1, Math.max(Math.abs(newLeft), Math.abs(newRight)));
+            
+            newLeft = newLeft / maxNewLeftRight;
+            newRight = newRight / maxNewLeftRight;            
+            
+           Components.robotDrive.drive(newLeft, newRight);
         } //End Driving Scope
+        
+        {//Targeting Scope
+            //System.out.println("Distance: " + table.getNumber("/SmartDashboard/Distance"));
+        } //End Targeting Scope
         
         {  //Shooter Scope
            if (Components.operatorControl.getButton(XboxController.Button.Start) & !justPressed[XboxController.Button.Start.value]) {    //Start button turns on shooter
@@ -104,22 +137,24 @@ public class AssistRobot extends IterativeRobot{
         } //End Shooter Scope
         
         { // Shooter Angle Scope
-           if (Components.operatorControl.getTrigger(-1) & !triggers[0]) {         //Left Trigger lowers the shooter angle
+           //System.out.println("Triggers: " + Components.operatorControl.getRawAxis(3)); //TODO DEBUG
+           if ((Components.operatorControl.getRawAxis(3) < 0) && !triggers[0]) {         //Left Trigger lowers the shooter angle
                EventBus.instance.push(new ShooterLowerAngleEvent());
                triggers[0] = true;
            } else {
                triggers[0] = false;
            } 
            
-           if (Components.operatorControl.getTrigger(1) & !triggers[1]) {         //Right Trigger raises the shooter angle
+           if ((Components.operatorControl.getRawAxis(3) > 0) && !triggers[1]) {         //Right Trigger raises the shooter angle
                EventBus.instance.push(new ShooterRaiseAngleEvent());
+               System.out.println("RT pressed");
                triggers[1] = true;
            } else {
                triggers[1] = false;
-           }
+            }  
         } // End Shooter Angle Scope
-        
-        { //Intake Scope
+         
+        { //Intake Scope 
            if (Components.operatorControl.getButton(XboxController.Button.B) & !justPressed[XboxController.Button.B.value]) {         //B angles intake in
                EventBus.instance.push(new IntakeAngleInEvent());
                justPressed[XboxController.Button.B.value] = true;
@@ -142,26 +177,42 @@ public class AssistRobot extends IterativeRobot{
            }
            
            if (Components.operatorControl.getButton(XboxController.Button.LB) & !justPressed[XboxController.Button.LB.value]) {         //Left Bumper starts the intake in reverse
-               EventBus.instance.push(new IntakeMotorReverseEvent());
+               EventBus.instance.push(new IntakeMotorForwardEvent());
                justPressed[XboxController.Button.LB.value] = true;
            } else {
                justPressed[XboxController.Button.LB.value] = false;
            }
            
            if (Components.operatorControl.getButton(XboxController.Button.RB) & !justPressed[XboxController.Button.RB.value]) {         //Right Bumper starts the intake forward
-               EventBus.instance.push(new IntakeMotorForwardEvent());
+               EventBus.instance.push(new IntakeMotorReverseEvent());
                justPressed[XboxController.Button.RB.value] = true;
            } else {
                justPressed[XboxController.Button.RB.value] = false;
-           }
+           }           
         } //End Intake Scope
-        
+        /*if (Components.operatorControl.getButton(XboxController.Button.A)) {         //B angles intake in
+              // EventBus.instance.push(new CompressorOnEvent());
+             
+               System.out.println("A button pressed and just pressed: ");
+               Components.compressorSpike.set(Relay.Value.kForward);
+               System.out.println("Relay Value: " + Components.compressorSpike.get().value);
+               
+       } else {
+               Components.compressorSpike.set(Relay.Value.kOff);
+               System.out.println("Relay Value: " + Components.compressorSpike.get().value);
+        }*/
         { //Compressor Scope
+            boolean safe = Components.compressorSafety.get();
+            System.out.println("Safety: " + safe);
             if (!Components.compressorSafety.get() && !compressorOn) {
                 EventBus.instance.push(new CompressorOnEvent());
+                System.out.println("In here at least once");
+                System.out.println("IF1: " + safe);
                 compressorOn = true;
-            }else {
+            }else if (Components.compressorSafety.get() && compressorOn) {
                 EventBus.instance.push(new CompressorOffEvent());
+                System.out.println("In other here at least once");
+                System.out.println("IF2: " + safe);
                 compressorOn = false;
             }
         } //End Compressor Scope
@@ -170,7 +221,7 @@ public class AssistRobot extends IterativeRobot{
             EventBus.instance.next();
             EventBus.instance.clean();
         } //End EvntBus Scope
-        
+
         //updateDashboard();
     }
     
