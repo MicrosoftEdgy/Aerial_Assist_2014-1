@@ -2,8 +2,8 @@ package org.firstrobotics1923.system;
 
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SpeedController;
-import org.firstrobotics1923.Components;
 import org.firstrobotics1923.util.MotorGroup;
+import org.firstrobotics1923.Components;
 
 /**
  * The Drive System
@@ -22,48 +22,34 @@ public class DriveSystem extends RobotDrive{
         super(leftSide, rightSide);
     }
     
+    /**
+     * Drive using Tank Drive
+     * @param leftMag Magnitude of the left side
+     * @param rightMag Magnitude of the right side
+     */
     public void drive(double leftMag, double rightMag) {
-        this.tankDrive(leftMag, rightMag);
-        Components.rightDriveEncoder.start();
+        this.tankDrive(leftMag, rightMag);   
+        Components.sfxDashboard.Left_Joy = leftMag;
+        Components.sfxDashboard.Victor_1 = leftMag;
+        Components.sfxDashboard.Victor_2 = leftMag;
+        Components.sfxDashboard.Right_Joy = rightMag;
+        Components.sfxDashboard.Victor_3 = rightMag;
+        Components.sfxDashboard.Victor_4 = rightMag;
+        
     }
     
     public void setSafety(boolean enabled) {
-        this.setSafetyEnabled(enabled);
-    }
-    
-    public boolean getRightEncoderDirection() {
-        return Components.rightDriveEncoder.getDirection();
-    }
-    
-    public boolean getLeftEncoderDirection() {
-        return Components.leftDriveEncoder.getDirection();
-    }
-    
-    public double getRightEncoderDistance() {
-        return Components.rightDriveEncoder.getDistance();
-    }
-    
-    public double getLeftEncoderDistance() {
-        return Components.leftDriveEncoder.getDistance();
-    }
-    
-    public double getRightEncoderRate() {
-        return Components.rightDriveEncoder.getRate();
-    }
-    
-    public double getLeftEncoderRate() {
-        return Components.leftDriveEncoder.getRate();
-    }
-    
-    public void resetEncoders() {
-        Components.rightDriveEncoder.reset();
-        Components.leftDriveEncoder.reset();
+       this.setSafetyEnabled(enabled);
     }
     
     public void stop() {
         super.stopMotor();
-        Components.rightDriveEncoder.stop();
-        Components.leftDriveEncoder.stop();
+        
+        Components.sfxDashboard.Victor_1 = 0.0;
+        Components.sfxDashboard.Victor_2 = 0.0;
+        
+        Components.sfxDashboard.Victor_3 = 0.0;
+        Components.sfxDashboard.Victor_4 = 0.0;
+        
     }   
 }
-

@@ -16,6 +16,6 @@ public class IntakeAngleInEvent extends Event{
     }
     
     public void event() {
-        //Components.intakeSystem.deactivate();
+        Components.intakeSystem.deactivate();
     }
 }

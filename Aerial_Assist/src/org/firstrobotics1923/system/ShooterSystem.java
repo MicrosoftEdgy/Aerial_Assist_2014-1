@@ -1,7 +1,9 @@
 package org.firstrobotics1923.system;
 
+import edu.wpi.first.wpilibj.Timer;
 import org.firstrobotics1923.util.DefaultConfig;
-import org.firstrobotics1923.util.ShooterMotorGroup;
+import org.firstrobotics1923.util.MotorGroup;
+import org.firstrobotics1923.Components;
 
 /**
  * The Shooter System
@@ -13,8 +15,9 @@ import org.firstrobotics1923.util.ShooterMotorGroup;
  */
 public class ShooterSystem implements System {
 
-    private final ShooterMotorGroup frontWheels, backWheels;
+    private final MotorGroup rightWheels, leftWheels;
     private double speed = DefaultConfig.SHOOTER_SPEED;
+    private Timer shootTimer = new Timer();
     
     /**
      * Creates a ShooterSystem with A set of front and back wheels
@@ -23,46 +26,57 @@ public class ShooterSystem implements System {
      * @param frontWheels 
      *              The motor group made of the Victors controlling the front wheels
      */
-    public ShooterSystem(ShooterMotorGroup backWheels, ShooterMotorGroup frontWheels) {
-       this.backWheels = backWheels;
-       this.frontWheels = frontWheels;
+    public ShooterSystem(MotorGroup leftWheels, MotorGroup rightWheels) {
+       this.leftWheels = leftWheels;
+       this.rightWheels = rightWheels;
     }
     
     /**
     * Starts Motors at set speed 
     */
     public void activate() {
-        frontWheels.set(speed);
-        backWheels.set(speed);
+        rightWheels.set(speed);
+        leftWheels.set(-speed);
+        
+        Components.sfxDashboard.ShooterWheel_Command = true;
+        Components.sfxDashboard.Victor_5 = speed;
+        Components.sfxDashboard.Victor_6 = speed;
+        Components.sfxDashboard.Victor_7 = -speed;
+        Components.sfxDashboard.Victor_8 = -speed;
+                
+        this.shootTimer.stop();
+        this.shootTimer.reset();
+        this.shootTimer.start();
     }
-    
-    /**
-     * Increases the speed of the motors by a constant
-     */
-    public void increaseSpeed(){
-        if(speed + DefaultConfig.SPEED_INCREMENT > 1.0){
-            speed = 1.0;
-        }else {
-            speed += DefaultConfig.SPEED_INCREMENT;  
-        }
-    }
-    
-    /**
-     * Decreases the speed of the motors by a constant
-     */
-    public void decreaseSpeed(){
-        if(speed - DefaultConfig.SPEED_INCREMENT < 0.0){
-            speed = 0.0;
-        }else {
-            speed -= DefaultConfig.SPEED_INCREMENT;
-        }
-    }
-    
+  
     /**
     * Stops the Motors on the shooter
     */
     public void stop() {
-        frontWheels.disable();
-        backWheels.disable();
+        rightWheels.set(0.0);
+        rightWheels.disable();
+        leftWheels.set(0.0);
+        leftWheels.disable();
+        
+        Components.sfxDashboard.ShooterWheel_Command = false;
+        Components.sfxDashboard.Victor_5 = 0.0;
+        Components.sfxDashboard.Victor_6 = 0.0;
+        Components.sfxDashboard.Victor_7 = 0.0;
+        Components.sfxDashboard.Victor_8 = 0.0;
+        
+        this.shootTimer.stop();
+        this.shootTimer.reset();
+        this.shootTimer.start(); //Keep This here
+        this.shootTimer.stop();
+    }
+    
+    public double getShootTime() {
+        return shootTimer.get();
+    }
+    
+    public void resetTimer() {
+        this.shootTimer.stop();
+        this.shootTimer.reset();
+        this.shootTimer.start();
     }
 }

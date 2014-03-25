@@ -7,10 +7,10 @@ package org.firstrobotics1923.event;
  * @since Jan. 9th, 2014
  */
 public abstract class Event implements Runnable{
-    private boolean run = false;                //Run or don't run
-    private boolean ran = false;                //Has it run once yet?
-    
-    private final boolean runOnce;              //Run once? Or more
+    public boolean run = false;                //Run or don't run
+    public boolean ran = false;                //Has it run once yet?
+    Thread thread;
+    public final boolean runOnce;              //Run once? Or more
     
     /**
      * Creates an event that will only run once
@@ -31,8 +31,9 @@ public abstract class Event implements Runnable{
      * Starts the Event
      */
     public void start() {
-        this.run = false; //@todo
-        new Thread().start();
+        this.run = true; 
+        this.thread = new Thread(this);
+        this.thread.start();
     }
     
     public void run() {
@@ -40,8 +41,10 @@ public abstract class Event implements Runnable{
             if (this.runOnce && !this.ran) {
                 this.event();
                 this.ran = true;
+                this.stop();
             }else if (!this.runOnce) {
                 this.event();
+                this.stop();
             }
         }
     }
@@ -50,8 +53,9 @@ public abstract class Event implements Runnable{
      * Stops the event
      */
     public void stop() {
-        this.run = false;
-        
+        this.run = false;    
+        //System.out.println("Before: " + this.thread.isAlive());
+        thread = null;
     }
     
     /**

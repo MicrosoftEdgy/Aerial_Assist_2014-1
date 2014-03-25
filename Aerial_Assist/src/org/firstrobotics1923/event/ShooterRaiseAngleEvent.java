@@ -20,5 +20,4 @@ public class ShooterRaiseAngleEvent extends Event {
     public void event() {
         Components.shooterAngleSystem.activate();
     }
-    
 }

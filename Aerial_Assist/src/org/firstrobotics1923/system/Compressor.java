@@ -1,6 +1,7 @@
 package org.firstrobotics1923.system;
 
 import edu.wpi.first.wpilibj.Relay;
+import org.firstrobotics1923.Components;
 
 /**
  * The on-board compressor
@@ -28,6 +29,8 @@ public class Compressor implements System{
      */
     public void start(){       
         compressor.set(Relay.Value.kOn);
+        //Components.sfxDashboard.CompressorRelay = true;
+        
     }
     
     /**
@@ -41,6 +44,7 @@ public class Compressor implements System{
      *  Stops the Compressor
      */
     public void stop(){      
-        compressor.set(Relay.Value.kOff);        
+        compressor.set(Relay.Value.kOff);  
+        //Components.sfxDashboard.CompressorRelay = false;
     }
 }

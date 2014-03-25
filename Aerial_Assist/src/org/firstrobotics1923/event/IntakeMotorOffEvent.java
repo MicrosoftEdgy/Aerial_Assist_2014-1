@@ -1,6 +1,5 @@
 package org.firstrobotics1923.event;
 
-import edu.wpi.first.wpilibj.Relay;
 import org.firstrobotics1923.Components;
 
 /**

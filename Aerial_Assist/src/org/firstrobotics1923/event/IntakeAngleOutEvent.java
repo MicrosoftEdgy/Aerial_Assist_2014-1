@@ -22,6 +22,6 @@ public class IntakeAngleOutEvent extends Event{
      * Extends the pistons connected to the intake system
      */
     public void event() {
-       // Components.intakeSystem.activate();
+        Components.intakeSystem.activate();
     }
 }

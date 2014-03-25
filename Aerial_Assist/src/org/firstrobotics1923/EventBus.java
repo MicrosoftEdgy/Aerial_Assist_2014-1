@@ -11,7 +11,7 @@ import org.firstrobotics1923.event.Event;
  * @since Jan. 25, 2014
  */
 public class EventBus {
-    public static EventBus instance;
+    public static EventBus instance = new EventBus();
     private final Vector eventQueue = new Vector();
     private final Vector running = new Vector();
     
@@ -36,7 +36,7 @@ public class EventBus {
      */
     public void clean(){
         int runningSize = running.size();
-        for( int i = runningSize; i >= 0; i-- ){
+        for( int i = (runningSize - 1); i >= 0; i-- ){
             Event e = (Event) this.running.elementAt(i);
             if(!e.isRunning()){
                 this.running.removeElementAt(i);

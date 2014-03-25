@@ -23,6 +23,6 @@ public class CompressorOffEvent extends Event {
     * Turns off compressor
     */
     public void event() {
-        //Components.compressorSpike.set(Relay.Value.kOff);
+        Components.compressorSpike.set(Relay.Value.kOff);
     }
 }

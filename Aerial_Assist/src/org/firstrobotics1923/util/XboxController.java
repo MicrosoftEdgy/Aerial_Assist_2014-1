@@ -34,23 +34,7 @@ public class XboxController extends Joystick {
     public double getDPad() {
         return this.getRawAxis(6);
     }
-    
-    /**
-     * Gets the input of Triggers
-     * @param hand
-     *            Integer representing which trigger: left (-1) or right (1)
-     * @return
-     *        Pressed or not
-     */
-    public boolean getTrigger(int hand) {
-        if (hand < 0) {
-            return this.getTrigger(Joystick.Hand.kLeft);
-        } else if (hand > 0) {
-            return this.getTrigger(Joystick.Hand.kRight);
-        }
-        return false;
-    }
-    
+  
     /**
      * Gets the axis of each Analog stick
      * @param stickNumber
